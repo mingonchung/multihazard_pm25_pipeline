@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=pa_stg03
+#SBATCH --array=1-4
+#SBATCH --mem=400G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%A_%a.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%A_%a.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 03: compute p95 temperature climatology tables (±7-day moving window).
+# Array 1-4: outdoor×gridmet, outdoor×daymet, indoor×gridmet, indoor×daymet.
+# Prerequisite: all GEE GridMET + DayMet hist + main extractions complete.
+case "${SLURM_ARRAY_TASK_ID}" in
+  1) echo "outdoor gridmet" ; Rscript stage03_pa_p95_climatology.R --type outdoor --source gridmet ;;
+  2) echo "outdoor daymet"  ; Rscript stage03_pa_p95_climatology.R --type outdoor --source daymet  ;;
+  3) echo "indoor gridmet"  ; Rscript stage03_pa_p95_climatology.R --type indoor  --source gridmet ;;
+  4) echo "indoor daymet"   ; Rscript stage03_pa_p95_climatology.R --type indoor  --source daymet  ;;
+esac

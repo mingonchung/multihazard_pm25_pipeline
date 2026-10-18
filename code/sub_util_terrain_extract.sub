@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=util_terrain
+#SBATCH --mem=32G
+#SBATCH --time=3-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Elevation, slope, and aspect for each AirNow sensor location from AWS
+# Terrain Tiles (Mapzen) at zoom level 12 (~20-30 m), via elevatr.
+# Reads   FILE_AIRNOW_LOC_SHP (util_sensor_location_shp.R)
+# Writes  FILE_AIRNOW_TERRAIN_SHP
+# Required by: stage09_attribute_join.R
+# Requires internet access for AWS tile downloads.
+Rscript util_terrain_extract.R

@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=pa_stg07_08
+#SBATCH --array=1-2
+#SBATCH --mem=200G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%A_%a.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%A_%a.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 07/08 (PurpleAir): daily aggregation + hazard classification.
+# Day = local standard calendar day (`date` from stage06_pa); kept if
+# >= MIN_HOURS_PM hourly values. Same classifier as AirNow stage07_08.
+# Reads per-year stage06_pa files; writes one classified file per type
+# (includes GMT_Offset). Array 1 = outdoor, 2 = indoor.
+# Prerequisite: all stage06_pa tasks of the type complete.
+case "${SLURM_ARRAY_TASK_ID}" in
+  1) echo "Stage 07/08 outdoor" ; Rscript stage07_08_pa_daily_classification.R outdoor ;;
+  2) echo "Stage 07/08 indoor"  ; Rscript stage07_08_pa_daily_classification.R indoor  ;;
+esac

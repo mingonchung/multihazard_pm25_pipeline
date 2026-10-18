@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=util_locshp
+#SBATCH --mem=64G
+#SBATCH --time=0-4:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# AirNow sensor location shapefile (util_sensor_location_shp.R).
+# Reads   FILE_AIRNOW_PM25 (acq_airnow_hourly_combine.R)
+#         FILE_AIRNOW_LOCS (acq_airnow_station_metadata.R + manual QA)
+# Writes  FILE_AIRNOW_LOC_SHP (AQSID, SiteName, lat, lon)
+# Required by: util_sensor_us_attrs.R, util_terrain_extract.R; uploaded to GEE
+#              as the AirNow sensor asset.
+#
+# Default: if FILE_AIRNOW_LOC_SHP exists it is NOT overwritten; the log lists
+# IDs only in one version, moved coordinates, and repeated IDs.
+# To replace the file:
+#   sbatch --export=ALL,LOCSHP_ARGS=--overwrite sub_util_sensor_location_shp.sub
+Rscript util_sensor_location_shp.R ${LOCSHP_ARGS:-}

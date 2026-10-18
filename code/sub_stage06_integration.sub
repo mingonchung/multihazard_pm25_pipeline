@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=stage06_int
+#SBATCH --mem=400G
+#SBATCH --time=2-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 6: master hourly integration (AirNow). Heaviest memory job.
+# Time base: AirNow Date/Time are UTC (hour beginning). `datetime` is UTC;
+# `date` is the local standard date (UTC + GMT_Offset, no DST).
+#   Daily sources (HMS/FIRED, AOD, GridMET, SPEI, Daymet, p95) join on `date`.
+#   Hourly sources (Storm Events, GVP) join on `datetime`.
+# Reads   FILE_AIRNOW_PM25, FILE_AIRNOW_LOCS, FILE_USCAN_SHP
+#         FILE_HMS_FIRED_OUT                     (stage02)
+#         FILE_GRIDMET_P95, FILE_DAYMET_P95      (stage03)
+#         FILE_STORM_OUT                         (stage04)
+#         FILE_GVP_OUT                           (stage05)
+#         FILE_AOD_047/055, FILE_GRIDMET_MAIN, FILE_GRIDMET_SPEI,
+#         FILE_DAYMET_MAIN                       (GEE extractions)
+# Writes  FILE_PM25_AOD_MET (adds date, GMT_Offset, srad_gridmet, srad_daymet)
+Rscript stage06_master_hourly_integration.R

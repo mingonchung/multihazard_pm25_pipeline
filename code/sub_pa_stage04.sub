@@ -1,0 +1,32 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=pa_stg04
+#SBATCH --mem=100G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 04 (PurpleAir): NOAA Storm Events -> PA sensors, compact interval table
+# (STATION, EVENT_ID, EVENT_TYPE, begin_datetime, end_datetime; UTC).
+# Hourly expansion happens in stage06_pa.
+# Two paths, as in the AirNow stage04: county-coded events by state + county
+# FIPS; zone-coded Hurricane/Tropical/Dust Storm events resolved to counties
+# (NWS zone-county file, then the lookup file), unresolved ones dropped and counted.
+# Needs in the working directory: util_storm_zone_resolve.R
+# Reads   DIR_STORM_RAW/*.csv.gz, FILE_ZONE_COUNTY, FILE_ZONE_LEGACY
+#         PA us_attrs shapefile (util_pa_sensor_location_shp.R)
+# Writes  FILE_PA_STORM_OUTDOOR, FILE_PA_STORM_INDOOR
+#
+# RE-RUN: the script skips a type whose output exists. Move the old
+# FILE_PA_STORM_OUTDOOR / FILE_PA_STORM_INDOOR out of the way first.
+set -e
+Rscript stage04_pa_noaa_storm_events_join.R outdoor
+Rscript stage04_pa_noaa_storm_events_join.R indoor

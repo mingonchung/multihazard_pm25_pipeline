@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=acq_storm_dl
+#SBATCH --mem=4G
+#SBATCH --time=0-2:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate PY0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Scrapes NCEI directory and downloads NOAA Storm Events CSV.GZ files.
+# Runtime: fast; ~12 annual files.
+python acq_noaa_storm_events_download.py

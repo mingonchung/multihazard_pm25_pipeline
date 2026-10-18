@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=ms1_outputs
+#SBATCH --mem=200G
+#SBATCH --time=0-12:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# MS1 Table 5, Figure 2, Figure 3 (AirNow + PurpleAir outdoor).
+# Reads   FILE_DAILY_INTEGRATED (stage09), FILE_PA_DAILY_INTEGRATED_OUTDOOR (stage09_pa)
+#         FILE_AIRNOW_USATTRS_SHP, FILE_PA_OUTDOOR_USATTRS_SHP
+#         Census county/state boundaries via tigris (internet on first run;
+#         cached afterwards)
+# Writes  ROOT_DIR/ms1/ (CSV, SVG, PNG)
+# Table 6 (sensitivity) runs separately: ms1_table7_sensitivity_analyses_rev.sub
+set -e
+Rscript ms1_table4_dataset_summary.R
+Rscript ms1_fig2_sensor_hazard_ranking.R
+Rscript ms1_fig3_concordance_check.R

@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=acq_gee_aod
+#SBATCH --mem=16G
+#SBATCH --time=1-12:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate PY0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+#SBATCH --array=0-1
+
+# Task 0 = AOD 047 nm    Task 1 = AOD 055 nm
+# GEE extracts use blocking getInfo() calls — these must run on nodes
+# with outbound internet access. Check with your sysadmin if jobs hang.
+BANDS=(047 055)
+BAND=${BANDS[$SLURM_ARRAY_TASK_ID]}
+
+echo "Starting MAIAC AOD extraction: band ${BAND}"
+python acq_maiac_aod_extract.py --band ${BAND}
+echo "Done: band ${BAND}"

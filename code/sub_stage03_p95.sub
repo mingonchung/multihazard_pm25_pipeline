@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=stage03_p95
+#SBATCH --mem=400G
+#SBATCH --time=0-12:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 3: builds station-specific p95 tmmx climatology (1981-2010, 1991-2020)
+# using a +-7-day moving window from GridMET and DayMet historical extracts.
+# Depends on: FILE_GRIDMET_HIST + FILE_DAYMET_HIST (acq_gee_gridmet hist/daymet hist)
+Rscript stage03_p95_climatology.R

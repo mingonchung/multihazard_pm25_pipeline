@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=pa_stg09
+#SBATCH --array=1-2
+#SBATCH --mem=128G
+#SBATCH --time=0-12:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%A_%a.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%A_%a.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 09 (PurpleAir): append terrain, US spatial attributes (urban/rural,
+# state, county FIPS), and calendar fields to the daily classified output;
+# keep US sensors. Array 1 = outdoor, 2 = indoor.
+# Prerequisite: stage07_08_pa, util_pa_sensor_location_shp, util_pa_terrain_extract.
+# Readers of the output: read STATION as text (colClasses).
+case "${SLURM_ARRAY_TASK_ID}" in
+  1) echo "Stage 09 outdoor" ; Rscript stage09_pa_attribute_join.R outdoor ;;
+  2) echo "Stage 09 indoor"  ; Rscript stage09_pa_attribute_join.R indoor  ;;
+esac

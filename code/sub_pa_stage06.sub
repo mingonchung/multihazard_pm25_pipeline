@@ -1,0 +1,51 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=pa_stg06
+#SBATCH --array=1-12
+#SBATCH --mem=200G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%A_%a.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%A_%a.err
+#SBATCH --chdir=/home/ges/chungmin
+
+# =============================================================================
+# Stage 06 (PurpleAir): master hourly integration — one task per type x year
+#
+# Array mapping:
+#   Tasks  1- 6 → outdoor 2020-2025  (task i → year 2019+i)
+#   Tasks  7-12 → indoor  2020-2025  (task i → year 2019+(i-6))
+#
+# Time base (same as AirNow stage06): RSIG timestamps are UTC. GMT_Offset is
+# the sensor's local standard offset from its coordinates (R package lutz,
+# must be installed in the environment). `date` = local standard date.
+# Each task covers the LOCAL year: it also reads the boundary hours of the
+# previous and next year's combined files, so all combine tasks of a type
+# must be complete before any stage06 task starts.
+#
+# Prerequisite: combine + all GEE + stages 02-05 complete.
+#   outdoor tasks need: CMB_OUT, AOD_OUT, GM_MAIN/SPEI/HIST, DM_MAIN/HIST done
+#   indoor  tasks need: CMB_IN,  AOD_IN,  GM_IN, DM_IN done
+#
+# RE-RUN: a task exits without work if its output exists
+# (PA_FILE_INTEGRATED_{OUTDOOR,INDOOR}_TPL in config_pa.R). Move old outputs first.
+# =============================================================================
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+TASK_ID=${SLURM_ARRAY_TASK_ID}
+
+if   [[ $TASK_ID -le 6 ]]; then
+  TYPE="outdoor"
+  YEAR=$((2019 + TASK_ID))
+else
+  TYPE="indoor"
+  YEAR=$((2019 + TASK_ID - 6))
+fi
+
+echo "Stage 06 | type: ${TYPE} | year: ${YEAR} | task: ${TASK_ID}"
+Rscript stage06_pa_master_hourly_integration.R "${TYPE}" "${YEAR}"

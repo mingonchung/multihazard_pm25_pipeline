@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=stage02_smoke
+#SBATCH --mem=400G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 2: point-in-polygon — assigns HMS smoke density + FIRED IDs to each
+# AirNow sensor location for each day. Emits sensor x date flat CSV.
+# Depends on: stage01 shapefiles in DIR_HMS_SMOKE/fired/
+#             FILE_AIRNOW_LOCS (requires completed manual metadata QA step)
+Rscript stage02_sensor_smoke_fire_assign.R

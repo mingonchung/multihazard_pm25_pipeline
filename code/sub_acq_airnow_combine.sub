@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=acq_airnow_cmb
+#SBATCH --mem=64G
+#SBATCH --time=0-8:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Concatenates all annual AirNow hourly CSVs into one compressed file.
+# Depends on: acq_airnow_download.R completing fully.
+Rscript acq_airnow_hourly_combine.R

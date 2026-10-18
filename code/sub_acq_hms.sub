@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=acq_hms
+#SBATCH --mem=8G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Downloads HMS smoke polygon ZIPs and fire point ZIPs (2014-2025).
+# Runtime: network-bound; ~12 hrs.
+Rscript acq_hms_download.R

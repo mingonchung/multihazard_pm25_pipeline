@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=stage01_hms
+#SBATCH --mem=64G
+#SBATCH --time=3-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 1: HMS smoke polygons x FIRED fire event delineations — spatial join.
+# Loops over 4,383 daily ZIPs; writes one SHP per day to DIR_HMS_SMOKE/fired/.
+# This is the most time-consuming spatial stage. 
+# Depends on: acq_hms_download.R + FIRED .gpkg in DIR_FIRED (pre-existing).
+Rscript stage01_hms_fired_join.R

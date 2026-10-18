@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=pa_gee_aod_out
+#SBATCH --array=1-6
+#SBATCH --mem=16G
+#SBATCH --time=2-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%A_%a.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%A_%a.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate PY0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# GEE asset: projects/YOUR_GEE_PROJECT/assets/purpleair (shp, already uploaded)
+# Array 1-6 → years 2020-2025. Both bands run sequentially per task.
+YEAR=$((2019 + SLURM_ARRAY_TASK_ID))
+echo "Task ${SLURM_ARRAY_TASK_ID} | Year ${YEAR} | AOD outdoor"
+python acq_pa_maiac_aod_extract.py --network outdoor --band 047 --year "${YEAR}"
+python acq_pa_maiac_aod_extract.py --network outdoor --band 055 --year "${YEAR}"

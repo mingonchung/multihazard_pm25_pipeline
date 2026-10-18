@@ -1,0 +1,24 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=stage09_attr
+#SBATCH --mem=400G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 9: appends terrain, US spatial attributes, and calendar fields to the
+# classified daily output; keeps US sensors.
+# Reads   FILE_DAILY_CLASSIFIED (stage07_08)
+#         FILE_AIRNOW_USATTRS_SHP (util_sensor_us_attrs.R)
+#         FILE_AIRNOW_TERRAIN_SHP (util_terrain_extract.R)
+# Writes  FILE_DAILY_INTEGRATED
+# Readers of the output: read AQSID_join as text (colClasses) to keep leading zeros.
+Rscript stage09_attribute_join.R

@@ -1,0 +1,29 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=ms1_sensitivity
+#SBATCH --mem=400G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+# MS1 Section 5.2 (Table 7): sensitivity analyses across classification parameters.
+# Reads FILE_PM25_AOD_MET (stage06 output) once into memory, keeps US sensors
+# (FILE_AIRNOW_USATTRS_SHP, as stage09), then runs 17 parameter settings
+# (12 perturbations + defaults) through the stage07_08 classification.
+# GVP buffer sensitivity (50 km vs 100 km) re-derives sensor-eruption
+# assignments from FILE_GVP_XLSX and FILE_AIRNOW_LOCS directly.
+# Depends on: FILE_PM25_AOD_MET (stage06), FILE_AIRNOW_USATTRS_SHP, FILE_GVP_XLSX,
+#             FILE_AIRNOW_LOCS, FILE_USCAN_SHP, config.R
+# Output: ROOT_DIR/ms1/ms1_table7_sensitivity_results.csv
+# Arguments after the job file name are passed to the script:
+#   sbatch ms1_table7_sensitivity_analyses_rev.sub              all runs
+#   sbatch ms1_table7_sensitivity_analyses_rev.sub --gvp-only   GVP buffer runs only; the 17
+#          parameter runs are read from the checkpoint in the output file
+Rscript ms1_table7_sensitivity_analyses_rev.R "$@"

@@ -1,0 +1,24 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=stage07_08
+#SBATCH --mem=400G
+#SBATCH --time=7-0:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stages 7-8: daily aggregation + hazard classification (AirNow).
+# Day = local standard calendar day; kept if >= MIN_HOURS_PM hourly values.
+# Each sensor-day is assigned one of 12 hazard categories, Baseline, or NA
+# (unclassified). Floor and heat persistence: PM_FLOOR, HEAT_MIN_DAYS (config.R).
+# No spell construction or pre/post windows (MS2).
+# Reads   FILE_PM25_AOD_MET (stage06)
+# Writes  FILE_DAILY_CLASSIFIED (includes GMT_Offset)
+Rscript stage07_08_daily_classification.R

@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=stage04_storm
+#SBATCH --mem=100G
+#SBATCH --time=1-00:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 4: NOAA Storm Events -> AirNow sensors, hourly records.
+# Two paths (CZ_FIPS is a county code in "C" records, a zone number in "Z"):
+#   County-coded: all event types; joined by state + county FIPS.
+#   Zone-coded:   Hurricane, Tropical, Dust Storm only; zone resolved to
+#                 counties (NWS zone-county file, then the lookup file for old
+#                 zones), then joined by state + county. Unresolved events are
+#                 dropped and counted in the log.
+# Event times converted from local standard time to UTC.
+# Needs in the working directory: util_storm_zone_resolve.R
+# Reads   DIR_STORM_RAW/*.csv.gz        (acq_noaa_storm_events_download.py)
+#         FILE_ZONE_COUNTY, FILE_ZONE_LEGACY
+#         FILE_AIRNOW_USATTRS_SHP       (util_sensor_us_attrs.R)
+#         FILE_AIRNOW_LOCS
+# Writes  FILE_STORM_OUT
+Rscript stage04_noaa_storm_events_join.R

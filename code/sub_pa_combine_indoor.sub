@@ -1,0 +1,24 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=pa_cmb_in
+#SBATCH --array=1-6
+#SBATCH --mem=500G
+#SBATCH --time=0-12:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%A_%a.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%A_%a.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Combine EPA RSIG daily .gz files → yearly CSV + sensor list — INDOOR.
+# Input:  /purpleair/raw/indoor/US/pm25_corrected/purpleair_*_YYYY-MM-DD.gz
+# Output: /purpleair/combined/purpleair_indoor_USCAN_{YEAR}.csv.gz
+#         /purpleair/raw/indoor/sensor_list_indoor.csv
+# Array 1-6 → years 2020-2025.
+echo "Task ${SLURM_ARRAY_TASK_ID} | Year $((2019 + SLURM_ARRAY_TASK_ID)) | indoor combine"
+Rscript acq_pa_hourly_combine.R "${SLURM_ARRAY_TASK_ID}" indoor

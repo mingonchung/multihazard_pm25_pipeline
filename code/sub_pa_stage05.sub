@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=pa_stg05
+#SBATCH --mem=128G
+#SBATCH --time=0-6:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# Stage 05: identify PA sensors within 100 km of active GVP eruption sites.
+# Produces STATION×eruption reference table used in stage06.
+# Prerequisite: util_pa_sensor_location_shp.R must have run.
+Rscript stage05_pa_gvp_join.R outdoor
+Rscript stage05_pa_gvp_join.R indoor

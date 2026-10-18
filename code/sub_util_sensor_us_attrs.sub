@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --partition=math-alderaan
+#SBATCH --job-name=util_usattrs
+#SBATCH --mem=32G
+#SBATCH --time=0-2:00:00
+#SBATCH --output=/home/ges/chungmin/logs/%x_%j.out
+#SBATCH --error=/home/ges/chungmin/logs/%x_%j.err
+#SBATCH --chdir=/home/ges/chungmin
+
+module purge
+source /data001/projects/chungmin/miniconda3/etc/profile.d/conda.sh
+conda activate MC0617
+
+export TMPDIR=/data002/scratch/$USER/tmp
+mkdir -p logs
+
+# State, county FIPS, and urban/rural class for each AirNow sensor location.
+# Reads   FILE_AIRNOW_LOC_SHP (util_sensor_location_shp.R)
+# Writes  FILE_AIRNOW_USATTRS_SHP
+# Required by: stage04_noaa_storm_events_join.R, stage09_attribute_join.R,
+#              ms1_fig2 / ms1_fig3 scripts
+Rscript util_sensor_us_attrs.R

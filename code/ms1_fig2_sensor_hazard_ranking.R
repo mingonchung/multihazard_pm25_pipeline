@@ -353,7 +353,7 @@ plot_rank_map <- function(sensor_sf, rank_col, panel_label, pt_size = 0.4) {
     draw_plot(p_conus, x = 0.22, y = 0.12, width = 0.76, height = 0.86) +
     draw_plot(ak_box,  x = 0.02, y = 0.55, width = 0.18, height = 0.23) +
     draw_plot(hi_box,  x = 0.04, y = 0.25, width = 0.20, height = 0.21) +
-    draw_label(panel_label, x = 0.23, y = 0.97,
+    draw_label(panel_label, x = 0.02, y = 0.99,
                hjust = 0, vjust = 1, size = 26, fontface = "bold", fontfamily = FONT)
 }
 
@@ -370,9 +370,9 @@ save_figure <- function(sensor_sf, pt_size, file_stem,
                                   sensor_sf$rank3)))
   used_all    <- color_map[names(color_map) %in% all_haz_fig]
 
-  pa <- plot_rank_map(sensor_sf, "rank1", "A", pt_size = pt_size)
-  pb <- plot_rank_map(sensor_sf, "rank2", "B", pt_size = pt_size)
-  pc <- plot_rank_map(sensor_sf, "rank3", "C", pt_size = pt_size)
+  pa <- plot_rank_map(sensor_sf, "rank1", "a", pt_size = pt_size)
+  pb <- plot_rank_map(sensor_sf, "rank2", "b", pt_size = pt_size)
+  pc <- plot_rank_map(sensor_sf, "rank3", "c", pt_size = pt_size)
 
   leg_df <- data.frame(
     haz = factor(names(used_all), levels = names(used_all)),

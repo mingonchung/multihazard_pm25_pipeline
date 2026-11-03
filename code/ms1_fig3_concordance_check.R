@@ -295,7 +295,7 @@ PT_SIZE <- c("AirNow" = 3.8, "PurpleAir" = 2.0)
 events <- list(
 
   A_Heat = list(
-    label       = "A. PNW Heat Dome",
+    label       = "a PNW Heat Dome",
     date_str    = "Jun 28 2021",
     short       = "A_heat",
     date        = as.Date("2021-06-28"),
@@ -304,11 +304,11 @@ events <- list(
     statefp     = "41",
     zoom        = c(-124.5, -121.4, 43.3, 46.2),
     color       = ov_color_map[["Heat (any)"]],
-    panel_lbl   = "A"
+    panel_lbl   = "a"
   ),
 
   B_Wildfire = list(
-    label       = "B. Dixie Fire",
+    label       = "b Dixie Fire",
     date_str    = "Aug 7 2021",
     short       = "B_wildfire",
     date        = as.Date("2021-08-07"),
@@ -318,11 +318,11 @@ events <- list(
     statefp     = "06",
     zoom        = c(-122.2, -119.8, 38.5, 41.8),
     color       = ov_color_map[["Wildfire (any)"]],
-    panel_lbl   = "B"
+    panel_lbl   = "b"
   ),
 
   C_Volcano = list(
-    label       = "C. Mauna Loa Eruption",
+    label       = "c Mauna Loa Eruption",
     date_str    = "Dec 9 2022",
     short       = "C_volcano",
     date        = as.Date("2022-12-09"),
@@ -331,11 +331,11 @@ events <- list(
     statefp     = "15",
     zoom        = c(-156.6, -154.3, 18.2, 21.0),
     color       = ov_color_map[["Volcano"]],
-    panel_lbl   = "C"
+    panel_lbl   = "c"
   ),
 
   D_Flood = list(
-    label       = "D. Las Vegas Flood",
+    label       = "d Las Vegas Flood",
     date_str    = "Sep 2 2023",
     short       = "D_flood",
     date        = as.Date("2023-09-02"),
@@ -344,11 +344,11 @@ events <- list(
     statefp     = "32",
     zoom        = c(-116.0, -113.9, 35.2, 37.4),
     color       = ov_color_map[["Flood"]],
-    panel_lbl   = "D"
+    panel_lbl   = "d"
   ),
 
   E_Dust = list(
-    label       = "E. Arizona Haboob",
+    label       = "e Arizona Haboob",
     date_str    = "Aug 25 2025",
     short       = "E_dust",
     date        = as.Date("2025-08-25"),
@@ -357,11 +357,11 @@ events <- list(
     statefp     = "04",
     zoom        = c(-113.5, -109.8, 30.6, 34.8),
     color       = ov_color_map[["Dust"]],
-    panel_lbl   = "E"
+    panel_lbl   = "e"
   ),
 
   F_Tornado = list(
-    label       = "F. Chicago-area Tornadoes",
+    label       = "f Chicago-area Tornadoes",
     date_str    = "Mar 19 2025",
     short       = "F_tornado",
     date        = as.Date("2025-03-19"),
@@ -370,11 +370,11 @@ events <- list(
     statefp     = "17",
     zoom        = c(-88.4, -86.9, 41.0, 42.2),
     color       = ov_color_map[["Tornado"]],
-    panel_lbl   = "F"
+    panel_lbl   = "f"
   ),
 
   G_Hurricane = list(
-    label       = "G. Hurricane Zeta",
+    label       = "g Hurricane Zeta",
     date_str    = "Oct 28 2020",
     short       = "G_hurricane",
     date        = as.Date("2020-10-28"),
@@ -383,11 +383,11 @@ events <- list(
     statefp     = "22",
     zoom        = c(-91.4, -88.9, 28.8, 31.0),
     color       = ov_color_map[["Hurricane"]],
-    panel_lbl   = "G"
+    panel_lbl   = "g"
   ),
 
   H_TropicalStorm = list(
-    label       = "H. Nicholas (Trop. Storm)",
+    label       = "h Nicholas (Trop. Storm)",
     date_str    = "Sep 13 2021",
     short       = "H_tropstorm",
     date        = as.Date("2021-09-13"),
@@ -396,7 +396,7 @@ events <- list(
     statefp     = "48",
     zoom        = c(-96.3, -94.6, 29.0, 30.6),
     color       = ov_color_map[["Tropical Storm"]],
-    panel_lbl   = "H"
+    panel_lbl   = "h"
   )
 )
 
@@ -789,7 +789,41 @@ ev_cents_df <- data.frame(panel_lbl = ev_cnty_conus$panel_lbl,
                           CY = st_coordinates(ev_cents)[, 2])
 ev_cents_df <- aggregate(cbind(CX, CY) ~ panel_lbl, data = ev_cents_df, FUN = mean)
 
-## Leader lines (CONUS events only; Volcano sits in the Hawaii inset)
+## Leader lines (CONUS events only; Volcano sits in the Hawaii inset).
+## Each line is cut where it crosses the Hawaii and Alaska inset boxes, so the
+## insets keep their transparent background without lines drawn over them.
+cut_interval <- function(iv, t0, t1) {
+  if (iv[2] <= t0 || iv[1] >= t1) return(list(iv))
+  out <- list()
+  if (iv[1] < t0) out <- c(out, list(c(iv[1], t0)))
+  if (iv[2] > t1) out <- c(out, list(c(t1, iv[2])))
+  out
+}
+seg_outside <- function(x, y, boxes) {
+  keep <- list(c(0, 1))
+  dx <- x[2] - x[1]
+  dy <- y[2] - y[1]
+  for (b in boxes) {
+    p  <- c(-dx, dx, -dy, dy)
+    q  <- c(x[1] - b$x, b$x + b$width - x[1], y[1] - b$y, b$y + b$height - y[1])
+    t0 <- 0
+    t1 <- 1
+    hit <- TRUE
+    for (k in 1:4) {
+      if (p[k] == 0) {
+        if (q[k] < 0) { hit <- FALSE; break }
+      } else if (p[k] < 0) {
+        t0 <- max(t0, q[k] / p[k])
+      } else {
+        t1 <- min(t1, q[k] / p[k])
+      }
+    }
+    if (!hit || t0 >= t1) next
+    keep <- unlist(lapply(keep, cut_interval, t0 = t0, t1 = t1), recursive = FALSE)
+  }
+  lapply(keep, function(iv) list(x = x[1] + iv * dx, y = y[1] + iv * dy))
+}
+
 for (nm in names(events)) {
   ev     <- events[[nm]]
   pp     <- LAYOUT[[nm]]
@@ -799,13 +833,15 @@ for (nm in names(events)) {
   is_left <- pp[1] < 0.5 && pp[2] > 0.01
   pan_x   <- if (pp[2] <= 0.01) pp[1] + pp[3] / 2 else if (is_left) pp[1] + pp[3] else pp[1]
   pan_y   <- if (pp[2] <= 0.01) pp[2] + pp[4] else pp[2] + pp[4] / 2
-  comp <- comp + draw_line(
-    x         = c(pan_x, us_pt$x),
-    y         = c(pan_y, us_pt$y),
-    color     = ev$color,
-    linewidth = 0.45,
-    linetype  = "dashed"
-  )
+  for (s in seg_outside(c(pan_x, us_pt$x), c(pan_y, us_pt$y), list(b_hi, b_ak))) {
+    comp <- comp + draw_line(
+      x         = s$x,
+      y         = s$y,
+      color     = ev$color,
+      linewidth = 0.45,
+      linetype  = "dashed"
+    )
+  }
 }
 
 leg_bg <- theme(legend.background = element_rect(fill = "white", colour = NA))

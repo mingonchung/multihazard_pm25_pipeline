@@ -2,7 +2,7 @@
 
 Code for the data harmonization pipeline described in:
 
-> Chung, M. G. et al. A multi-hazard PM2.5 attribution dataset for the United States, 2014–2025. *Scientific Data* [ADD: volume, article, DOI upon publication].
+> Chung, M. G. et al. A multi-hazard PM2.5 attribution dataset for the United States, 2014–2025. *Scientific Data* (submitted).
 
 The pipeline attaches smoke, fire, storm, volcanic, meteorological, drought, and aerosol data to hourly PM₂.₅ from two networks and assigns each monitor-day or sensor-day to one of 12 hazard categories or Baseline, or leaves it unclassified (`hazard_cat = NA`).
 
@@ -17,9 +17,9 @@ Stage numbers in this README follow Figure 1 of the paper (Stages 1–8). Script
 
 | File | Content | Where |
 |---|---|---|
-| `airnow_daily_classified_US.csv.gz` (470 MB) | AirNow daily classified records, CONUS, Alaska, and Hawaii, 2014–2025. Columns in Table 4 of the paper | Zenodo [ADD: DOI] |
-| `airnow_pm25_location_us_attrs.shp` and its companion files | AirNow monitor locations with state, county, and urban attributes. Join to the daily file by `AQSID` | Zenodo [ADD: DOI] |
-| Code and the hand-prepared inputs (`inputs/`) | This repository | GitHub [ADD: URL], archived at Zenodo [ADD: DOI] |
+| `airnow_daily_classified_US.csv.gz` (470 MB) | AirNow daily classified records, CONUS, Alaska, and Hawaii, 2014–2025. Columns in Table 4 of the paper | Zenodo, https://doi.org/10.5281/zenodo.23930322 |
+| `airnow_pm25_location_us_attrs.zip` (shapefile and its companion files) | AirNow monitor locations with state, county, and urban attributes. Monitor coordinates are not repeated in the daily file. Join to it by `AQSID` | Zenodo, https://doi.org/10.5281/zenodo.23930322 |
+| Code and the hand-prepared inputs (`inputs/`) | This repository | https://github.com/mingonchung/multihazard_pm25_pipeline, archived at Zenodo, https://doi.org/10.5281/zenodo.23930322 |
 
 Not released: PurpleAir sensor records and sensor-level pipeline outputs (daily files, hourly tables, sensor lists and shapefiles, sensor-level result tables), and the Stage 5 hourly integration tables. Users with PurpleAir API access can produce the PurpleAir outputs with the released code ([PurpleAir input](#purpleair-input)).
 
@@ -78,7 +78,7 @@ PurpleAir versions of the scripts carry `_pa` in the file name (e.g., `stage07_0
 | 3 | `stage04_noaa_storm_events_join.R` | `stage04_pa_noaa_storm_events_join.R` | Storm Events join by county (zone-coded Hurricane, Tropical Storm/Depression, and Dust Storm records resolved to counties) |
 | 4 | `stage05_gvp_join.R` | `stage05_pa_gvp_join.R` | GVP eruption flags within `GVP_BUFFER_M` (100 km) of each volcano |
 | 5 | `stage06_master_hourly_integration.R` | `stage06_pa_master_hourly_integration.R` | Hourly integration table (one row per monitor-hour or sensor-hour) |
-| 6–7 | `stage07_08_daily_classification.R` | `stage07_08_pa_daily_classification.R` | Daily aggregation and hazard classification |
+| 6/7 | `stage07_08_daily_classification.R` | `stage07_08_pa_daily_classification.R` | Daily aggregation and hazard classification |
 | 8 | `stage09_attribute_join.R` | `stage09_pa_attribute_join.R` | Terrain, U.S. attributes, and calendar fields; non-U.S. locations removed |
 
 ### Utilities
@@ -161,7 +161,7 @@ Classification parameters are defined in `config.R` (Table 3 of the paper): `CLN
 | NWS zone–county correlation file | `FILE_ZONE_COUNTY` | Release `bp18mr25.dbx` from https://www.weather.gov/gis/ZoneCounty. Place in `DIR_STORM` |
 | GVP eruption list | `FILE_GVP_XLSX` | Smithsonian GVP Holocene eruption list (confirmed eruptions), downloaded 2026-04-24, records through March 2026 (`GVP_Eruption_List_Holocene_20260424.xlsx`). Continuing eruptions carry the as-of date as end date |
 | GVP volcano coordinates | `FILE_GVP_COORDS` | Smithsonian GVP Holocene volcano list (Volcanoes of the World v. 5.4.0), downloaded 2026-10-09. The site delivers an Excel 2003 XML `.xls`. Open it in Excel and save as `.xlsx` (`GVP_Volcano_List_Holocene_202610091715.xlsx`) |
-| FIRED events | `FILE_FIRED_EVENTS` | `fired_usa_2000_to_2026_events.gpkg` (U.S. events through 2025). Obtained before its public release. This version will be posted in the FIRED collection at CU Scholar (https://scholar.colorado.edu/collections/pz50gx05h) |
+| FIRED events | `FILE_FIRED_EVENTS` | `fired_usa_2000_to_2026_events.gpkg` (U.S. events through 2025), archived in the FIRED collection at CU Scholar (https://scholar.colorado.edu/collections/pz50gx05h) |
 | Urban areas 2020 | `FILE_URBAN_SHP` | Census cartographic boundary file `cb_2020_us_ua20_500k`, saved as `cb_2020_us_ua20_500k_prj.shp` (any CRS; the script transforms it) |
 | U.S.–Canada boundary | `FILE_USCAN_SHP` | `inputs/us_canada.shp` (with its companion files). Copy to `DIR_USCAN` and upload to GEE as the `uscan` asset. Monitors outside this boundary are removed in Stage 5 |
 | PurpleAir hourly files | `DIR_PA_RAW` (`config_pa.R`) | See [PurpleAir input](#purpleair-input) |
@@ -202,7 +202,7 @@ Rscript stage03_p95_climatology.R           # Stage 2
 Rscript stage04_noaa_storm_events_join.R    # Stage 3
 Rscript stage05_gvp_join.R                  # Stage 4
 Rscript stage06_master_hourly_integration.R # Stage 5
-Rscript stage07_08_daily_classification.R   # Stages 6-7
+Rscript stage07_08_daily_classification.R   # Stage 6/7
 Rscript stage09_attribute_join.R            # Stage 8 -> FILE_DAILY_INTEGRATED
 ```
 
@@ -248,7 +248,7 @@ Outputs are written to `ROOT_DIR/ms1/`. The sensitivity script reads the AirNow 
 
 `stage02_pa`, `stage04_pa`, and `stage06_pa` skip outputs that already exist. Move old outputs before re-running them. The AirNow stages overwrite their outputs. `acq_airnow_hourly_combine.R` appends to its output files and stops if any already exist. Move them before re-running.
 
-To change a parameter, edit `config.R` and re-run from the stage that applies it: the GEE extraction for `BUFFER_M` and `SCALE_M`, Stage 2 for the p95 settings, Stage 4 for `GVP_BUFFER_M`, and Stages 6–7 for the classification thresholds.
+To change a parameter, edit `config.R` and re-run from the stage that applies it: the GEE extraction for `BUFFER_M` and `SCALE_M`, Stage 2 for the p95 settings, Stage 4 for `GVP_BUFFER_M`, and Stage 6/7 for the classification thresholds.
 
 ---
 
@@ -294,8 +294,8 @@ Where neither source has a value, Heat is not assigned and the Baseline temperat
 ### Reading the outputs
 
 - Column definitions: Table 4 of the paper.
-- Read identifiers as text, e.g. `fread(f, colClasses = list(character = c("AQSID", "AQSID_join")))` (AirNow) or `colClasses = list(character = "STATION")` (PurpleAir). `AQSID` carries a leading apostrophe. `AQSID_join` is the same identifier without it and loses leading zeros if read as a number.
-- `hazard_cat` strings: `Volcano`, `Wildfire+Heat+Drought`, `Wildfire+Heat`, `Wildfire+Drought`, `Wildfire`, `Dust`, `Heat+Drought`, `Heat`, `Tornado`, `Hurricane`, `TropicalStorm`, `Flood`, `Baseline`, and NA (unclassified).
+- Read identifiers as text, e.g. `fread(f, colClasses = list(character = c("AQSID", "AQSID_join")))` (AirNow) or `colClasses = list(character = "STATION")` (PurpleAir). `AQSID` carries a leading apostrophe. `AQSID_join` (and `AQSID_norm`, identical) is the same identifier without it and loses leading zeros if read as a number. These two join keys are not listed in Table 4.
+- `hazard_cat` strings: `Volcano`, `Wildfire+Heat+Drought`, `Wildfire+Heat`, `Wildfire+Drought`, `Wildfire`, `Dust`, `Heat+Drought`, `Heat`, `Tornado`, `Hurricane`, `TropicalStorm` (Tropical Storm in the paper), `Flood`, `Baseline`, and NA (unclassified).
 - Unclassified days meet neither a hazard criterion nor the Baseline conditions. They are kept for temporal continuity and can be classified further with other data.
 - HMS smoke density, FIRED identifiers, and Storm Events `EVENT_TYPE` are in the Stage 5 hourly integration table, not in the daily files.
 - Monitor-days with `tmmx` missing and `tmax` present were classified with Daymet temperature.
@@ -355,4 +355,6 @@ Code: MIT License (`LICENSE`). Data (AirNow daily file and monitor location shap
 
 ## Citation
 
-Cite the paper above and the Zenodo record (code and AirNow data): [ADD: Zenodo citation and DOI].
+Cite the paper above and the Zenodo record (code and AirNow data):
+
+> Chung, M. G., Crawford, B., Clements, N., Holder, A., St. Denis, L. A. & Damby, D. E. A multi-hazard PM2.5 attribution dataset for the United States, 2014–2025: AirNow daily data and pipeline code (v1.0.1). *Zenodo* https://doi.org/10.5281/zenodo.23930322 (2026).

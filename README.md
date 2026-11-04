@@ -17,7 +17,7 @@ Stage numbers in this README follow Figure 1 of the paper (Stages 1–8). Script
 
 | File | Content | Where |
 |---|---|---|
-| `airnow_daily_classified_US.csv.gz` (470 MB) | AirNow daily classified records, CONUS, Alaska, and Hawaii, 2014–2025. Columns in Table 4 of the paper | Zenodo, https://doi.org/10.5281/zenodo.23930322 |
+| `airnow_daily_classified_US.csv.gz` (492 MB) | AirNow daily classified records, CONUS, Alaska, and Hawaii, 2014–2025. Columns in Table 4 of the paper | Zenodo, https://doi.org/10.5281/zenodo.23930322 |
 | `airnow_pm25_location_us_attrs.zip` (shapefile and its companion files) | AirNow monitor locations with state, county, and urban attributes. Monitor coordinates are not repeated in the daily file. Join to it by `AQSID` | Zenodo, https://doi.org/10.5281/zenodo.23930322 |
 | Code and the hand-prepared inputs (`inputs/`) | This repository | https://github.com/mingonchung/multihazard_pm25_pipeline, archived at Zenodo, https://doi.org/10.5281/zenodo.23930322 |
 
@@ -357,4 +357,4 @@ Code: MIT License (`LICENSE`). Data (AirNow daily file and monitor location shap
 
 Cite the paper above and the Zenodo record (code and AirNow data):
 
-> Chung, M. G., Crawford, B., Clements, N., Holder, A., St. Denis, L. A. & Damby, D. E. A multi-hazard PM2.5 attribution dataset for the United States, 2014–2025: AirNow daily data and pipeline code (v1.0.2). *Zenodo* https://doi.org/10.5281/zenodo.23930322 (2026).
+> Chung, M. G. A multi-hazard PM2.5 attribution dataset for the United States, 2014–2025: AirNow daily data and pipeline code (v1.0.2). *Zenodo* https://doi.org/10.5281/zenodo.23930322 (2026).

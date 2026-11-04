@@ -357,4 +357,4 @@ Code: MIT License (`LICENSE`). Data (AirNow daily file and monitor location shap
 
 Cite the paper above and the Zenodo record (code and AirNow data):
 
-> Chung, M. G. A multi-hazard PM2.5 attribution dataset for the United States, 2014–2025: AirNow daily data and pipeline code (v1.0.2). *Zenodo* https://doi.org/10.5281/zenodo.23930322 (2026).
+> Chung, M. G. A multi-hazard PM2.5 attribution dataset for the United States, 2014–2025 (v1.0.2). *Zenodo* https://doi.org/10.5281/zenodo.23930322 (2026).
